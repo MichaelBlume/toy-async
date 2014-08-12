@@ -1,7 +1,6 @@
 (ns toy-async.core
   (:gen-class)
   (:require [clojure.core.async :refer [go >! <! timeout chan <!! close! >!!]]
-            [cheshire.core :refer [generate-string]]
             [org.httpkit.client :as http]
             [org.httpkit.server :refer [send! with-channel run-server]]))
 
