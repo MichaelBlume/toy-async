@@ -1,4 +1,5 @@
 (defproject toy-async "0.1.0-SNAPSHOT"
+  :main toy-async.core
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
