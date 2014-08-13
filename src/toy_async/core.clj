@@ -14,31 +14,32 @@
         (close! c)))
     c))
 
+(defmacro go-channel [r c & body]
+  `(with-channel ~r ~c
+     (go ~@body)))
+
 (defn threads [r]
   {:body (-> (Thread/getAllStackTraces)
              count
              (str \newline))})
 
 (defn foo [r]
-  (with-channel r c
-    (go
-      (<! (timeout 3000))
-      (send! c {:body "foo"}))))
+  (go-channel r c
+    (<! (timeout 3000))
+    (send! c {:body "foo"})))
 
 (defn bar [r]
-  (with-channel r c
-    (go
-      (<! (timeout 5000))
-      (send! c {:body "bar"}))))
+  (go-channel r c
+    (<! (timeout 5000))
+    (send! c {:body "bar"})))
 
 (defn foobar [r]
-  (with-channel r c
-    (go
-      (let [foo-chan (get-chan "http://localhost:8000/foo")
-            bar-chan (get-chan "http://localhost:8000/bar")
-            res (str (:body (<! foo-chan))
-                     (:body (<! bar-chan)))]
-        (send! c {:body res})))))
+  (go-channel r c
+    (let [foo-chan (get-chan "http://localhost:8000/foo")
+          bar-chan (get-chan "http://localhost:8000/bar")
+          res (str (:body (<! foo-chan))
+                   (:body (<! bar-chan)))]
+      (send! c {:body res}))))
 
 (defn handler [request]
   (let [uri (:uri request)
