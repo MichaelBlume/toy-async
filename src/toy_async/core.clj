@@ -2,6 +2,9 @@
   (:gen-class)
   (:require [clojure.core.async :refer [go >! <! timeout chan <!! close! >!!]]
             [org.httpkit.client :as http]
+            [compojure.core :refer :all]
+            [compojure.route :as route]
+            [compojure.handler :refer [site]]
             [org.httpkit.server :refer [send! with-channel run-server]]))
 
 (defn get-chan [url]
@@ -41,13 +44,11 @@
                    (:body (<! bar-chan)))]
       (send! c {:body res}))))
 
-(defn handler [request]
-  (let [uri (:uri request)
-        dispatch (or ({"/foo" foo
-                       "/bar" bar
-                       "/threads" threads
-                       "/foobar" foobar} uri)
-                     (constantly {:body "not found"}))]
-    (dispatch request)))
+(defroutes handler
+  (GET "/foo" [] foo)
+  (GET "/bar" [] bar)
+  (GET "/foobar" [] foobar)
+  (GET "/threads" [] threads)
+  (route/not-found "not found"))
 
-(defn -main [] (run-server #'handler {:port 8000}))
+(defn -main [] (run-server (site #'handler) {:port 8000}))
